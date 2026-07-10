@@ -1,0 +1,19 @@
+Node ID: 1704b0fd | Project: 1783545818587 | Label: 'Software Development' | Type: Domain
+Node ID: afbb2376 | Project: 1783545818587 | Label: 'Data Science & ML' | Type: Domain
+Node ID: 61caa481 | Project: 1783545818587 | Label: 'DevOps & Automation' | Type: Domain
+Node ID: 406e22f5 | Project: 1783545818587 | Label: 'UX/UI Design' | Type: Domain
+Node ID: b1827ee8 | Project: 1783545818587 | Label: 'Project Management' | Type: Domain
+Node ID: 86fef0c5 | Project: 1783547952549 | Label: 'Transformer' | Type: Concept
+Node ID: 24d21b64 | Project: 1783547952549 | Label: 'Self‑attention' | Type: Concept
+Node ID: 014413c5 | Project: 1783547952549 | Label: 'Multi‑head attention' | Type: Concept
+Node ID: e28463a4 | Project: 1783547952549 | Label: 'Encoder' | Type: Component
+Node ID: b7f71efd | Project: 1783547952549 | Label: 'Decoder' | Type: Component
+Node ID: e925b886 | Project: 1783547952549 | Label: 'Positional encoding' | Type: Concept
+Node ID: bc2f4dbd | Project: 1783547952549 | Label: 'Neural network' | Type: Concept
+Node ID: 66048574 | Project: 1783547952549 | Label: 'Deep learning' | Type: Concept
+Node ID: 38a70900 | Project: 1783547952549 | Label: 'Natural language processing' | Type: Concept
+Node ID: c79fc3a3 | Project: 1783547952549 | Label: 'Computer vision' | Type: Concept
+Node ID: 62cf455d | Project: 1783547952549 | Label: 'BERT' | Type: Model
+Node ID: 352bbf2f | Project: 1783547952549 | Label: 'GPT' | Type: Model
+Node ID: e5fbb05f | Project: 1783547952549 | Label: 'T5' | Type: Model
+Node ID: 25149cca | Project: 1783547952549 | Label: 'Vision Transformer' | Type: Model
