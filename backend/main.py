@@ -5,10 +5,15 @@ from .api import routes
 from contextlib import asynccontextmanager
 from .database import init_db
 
+import asyncio
+from .services.graph_writer import run_graph_writer
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
+    task = asyncio.create_task(run_graph_writer())
     yield
+    task.cancel()
 
 app = FastAPI(title="INGOT.ai Backend", version="1.0.0", lifespan=lifespan)
 

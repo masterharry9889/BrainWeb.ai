@@ -109,7 +109,7 @@ export default function MainView() {
     setIsModalOpen(false);
     setIsUploading(false);
     
-    router.push(`/project/${newProjectId}/chat`);
+    router.push(`/project/view/chat?id=${newProjectId}`);
   };
 
   return (
@@ -124,7 +124,10 @@ export default function MainView() {
     }}>
       {/* Dashboard Minimal Header */}
       <header style={{ width: '100%', padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div className="logo-small" style={{ fontSize: '1.5rem', padding: 0 }}>INGOT</div>
+        <div className="logo-small" style={{ fontSize: '1.5rem', padding: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <img src="/logo.webp" alt="INGOT Logo" style={{ height: '36px', width: 'auto', borderRadius: '8px' }} />
+          INGOT
+        </div>
         <Link href="/settings" className="notch-icon-btn" style={{ background: 'transparent', margin: 0 }} title="Settings">
           <Settings size={20} />
         </Link>
@@ -158,7 +161,7 @@ export default function MainView() {
             {projects.map(p => (
               <div 
                 key={p.id} 
-                onClick={() => router.push(`/project/${p.id}/chat`)}
+                onClick={() => router.push(`/project/view/chat?id=${p.id}`)}
                 className="glass" 
                 style={{ 
                   padding: '1.5rem', 

@@ -1,0 +1,65 @@
+{
+  "name": "ingot-desktop",
+  "version": "1.0.0",
+  "description": "INGOT.ai Desktop App",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "build": {
+    "appId": "com.ingot.desktop",
+    "productName": "INGOT.ai",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico",
+      "extraResources": [
+        {
+          "from": "../backend/dist/ingot-backend.exe",
+          "to": "ingot-backend.exe"
+        },
+        {
+          "from": "../frontend/out",
+          "to": "app"
+        }
+      ]
+    },
+    "mac": {
+      "target": "dmg",
+      "extraResources": [
+        {
+          "from": "../backend/dist/ingot-backend",
+          "to": "ingot-backend"
+        },
+        {
+          "from": "../frontend/out",
+          "to": "app"
+        }
+      ]
+    },
+    "linux": {
+      "target": "AppImage",
+      "extraResources": [
+        {
+          "from": "../backend/dist/ingot-backend",
+          "to": "ingot-backend"
+        },
+        {
+          "from": "../frontend/out",
+          "to": "app"
+        }
+      ]
+    }
+  },
+  "dependencies": {
+    "png-to-ico": "^3.0.2"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  }
+}

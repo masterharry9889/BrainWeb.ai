@@ -6,7 +6,7 @@ from .models import Base
 
 DATABASE_URL = os.environ.get(
     "DATABASE_URL", 
-    "postgresql+asyncpg://ingot:password@127.0.0.1:5432/ingot_db"
+    "sqlite+aiosqlite:///./ingot_data.db"
 )
 
 engine = create_async_engine(DATABASE_URL, echo=False)
@@ -17,8 +17,6 @@ async_session = sessionmaker(
 
 async def init_db():
     async with engine.begin() as conn:
-        # Create pgvector extension if it doesn't exist
-        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
         await conn.run_sync(Base.metadata.create_all)
         
         # Safely migrate existing tables

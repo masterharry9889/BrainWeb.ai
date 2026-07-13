@@ -1,7 +1,6 @@
 from sqlalchemy import Column, String, DateTime, Integer, JSON, ForeignKey, Float
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.sql import func
-from pgvector.sqlalchemy import Vector
 from datetime import datetime
 
 Base = declarative_base()
@@ -34,7 +33,7 @@ class Node(Base):
     project_id = Column(String, nullable=False, default="default", index=True)
     label = Column(String, nullable=False)
     type = Column(String, nullable=False)
-    embedding = Column(Vector(1536))
+    embedding = Column(JSON, default=list)
     metadata_ = Column("metadata", JSON, default=dict)
     mention_count = Column(Integer, default=1)
     created_at = Column(DateTime(timezone=True), default=func.now())

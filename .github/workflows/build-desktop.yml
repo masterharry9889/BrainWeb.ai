@@ -1,0 +1,70 @@
+name: Build Desktop App
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Install and Build Frontend
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npm run build
+          
+      - name: Install and Build Backend
+        working-directory: ./backend
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+          python build.py
+          
+      - name: Install and Build Electron App
+        working-directory: ./desktop
+        run: |
+          npm ci
+          npm run dist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ingot-desktop-${{ matrix.os }}
+          path: desktop/dist/*.exe
+          if-no-files-found: ignore
+          
+      - name: Upload Mac Artifacts
+        uses: actions/upload-artifact@v4
+        if: matrix.os == 'macos-latest'
+        with:
+          name: ingot-desktop-mac
+          path: desktop/dist/*.dmg
+          
+      - name: Upload Linux Artifacts
+        uses: actions/upload-artifact@v4
+        if: matrix.os == 'ubuntu-latest'
+        with:
+          name: ingot-desktop-linux
+          path: desktop/dist/*.AppImage

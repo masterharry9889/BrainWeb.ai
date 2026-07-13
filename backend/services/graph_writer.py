@@ -60,8 +60,8 @@ async def process_event(event: dict):
             # pgvector cosine distance operator is <=>
             query = select(Node).where(
                 (Node.project_id == project_id) &
-                ((Node.label == label) | (Node.embedding.cosine_distance(embedding) < 0.1))
-            ).order_by(Node.embedding.cosine_distance(embedding)).limit(1)
+                (Node.label == label)
+            ).limit(1)
             
             result = await db.execute(query)
             existing_node = result.scalars().first()
