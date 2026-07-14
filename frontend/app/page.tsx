@@ -23,7 +23,7 @@ export default function MainView() {
   const router = useRouter();
 
   useEffect(() => {
-    const saved = localStorage.getItem('ingot_projects');
+    const saved = localStorage.getItem('brainweb_projects');
     if (saved) {
       try {
         setProjects(JSON.parse(saved));
@@ -36,7 +36,7 @@ export default function MainView() {
 
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem('ingot_projects', JSON.stringify(projects));
+      localStorage.setItem('brainweb_projects', JSON.stringify(projects));
     }
   }, [projects, isLoaded]);
 
@@ -45,20 +45,20 @@ export default function MainView() {
     setProjects(projects.filter(p => p.id !== id));
     
     // Wipe isolated frontend state
-    const chatsData = localStorage.getItem(`ingot_chats_${id}`);
+    const chatsData = localStorage.getItem(`brainweb_chats_${id}`);
     if (chatsData) {
       try {
         const chats = JSON.parse(chatsData);
         chats.forEach((chat: any) => {
-          localStorage.removeItem(`ingot_chat_${id}_${chat.id}`);
+          localStorage.removeItem(`brainweb_chat_${id}_${chat.id}`);
         });
       } catch (err) {}
-      localStorage.removeItem(`ingot_chats_${id}`);
+      localStorage.removeItem(`brainweb_chats_${id}`);
     }
-    localStorage.removeItem(`ingot_chat_${id}`); // Legacy
-    localStorage.removeItem(`ingot_canvas_nodes_${id}`);
-    localStorage.removeItem(`ingot_canvas_edges_${id}`);
-    localStorage.removeItem(`ingot_active_agents_${id}`);
+    localStorage.removeItem(`brainweb_chat_${id}`); // Legacy
+    localStorage.removeItem(`brainweb_canvas_nodes_${id}`);
+    localStorage.removeItem(`brainweb_canvas_edges_${id}`);
+    localStorage.removeItem(`brainweb_active_agents_${id}`);
     
     // Wipe backend resources
     try {
@@ -104,8 +104,8 @@ export default function MainView() {
           content: `Please analyze these uploaded files and extract the knowledge graph entities:\n\n${data.text}`,
           timestamp: new Date().toISOString()
         };
-        localStorage.setItem(`ingot_chats_${newProjectId}`, JSON.stringify([{ id: 'default', name: 'Default Chat' }]));
-        localStorage.setItem(`ingot_chat_${newProjectId}_default`, JSON.stringify([initialMessage]));
+        localStorage.setItem(`brainweb_chats_${newProjectId}`, JSON.stringify([{ id: 'default', name: 'Default Chat' }]));
+        localStorage.setItem(`brainweb_chat_${newProjectId}_default`, JSON.stringify([initialMessage]));
       } catch (err) {
         console.error("Upload failed", err);
         alert("Upload failed. Make sure the backend server is running.");
@@ -113,7 +113,7 @@ export default function MainView() {
         return;
       }
     } else {
-      localStorage.setItem(`ingot_chats_${newProjectId}`, JSON.stringify([{ id: 'default', name: 'Default Chat' }]));
+      localStorage.setItem(`brainweb_chats_${newProjectId}`, JSON.stringify([{ id: 'default', name: 'Default Chat' }]));
     }
     
     setProjects([newProject, ...projects]);
@@ -138,8 +138,8 @@ export default function MainView() {
       {/* Dashboard Minimal Header */}
       <header style={{ width: '100%', padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div className="logo-small" style={{ fontSize: '1.5rem', padding: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <img src="/logo.webp" alt="INGOT Logo" style={{ height: '36px', width: 'auto', borderRadius: '8px' }} />
-          INGOT
+          <img src="/logo.webp" alt="BrainWeb Logo" style={{ height: '36px', width: 'auto', borderRadius: '8px' }} />
+          BrainWeb
         </div>
         <Link href="/settings" className="notch-icon-btn" style={{ background: 'transparent', margin: 0 }} title="Settings">
           <Settings size={20} />

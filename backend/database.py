@@ -4,12 +4,14 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
 from .models import Base
 
+from sqlalchemy.pool import NullPool
+
 DATABASE_URL = os.environ.get(
     "DATABASE_URL", 
-    "sqlite+aiosqlite:///./ingot_data.db"
+    "sqlite+aiosqlite:///./brainweb_data.db"
 )
 
-engine = create_async_engine(DATABASE_URL, echo=False)
+engine = create_async_engine(DATABASE_URL, echo=False, poolclass=NullPool)
 
 async_session = sessionmaker(
     engine, class_=AsyncSession, expire_on_commit=False

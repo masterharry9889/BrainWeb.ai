@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
 export const metadata: Metadata = {
-  title: "INGOT.ai - AI Orchestration",
+  title: "BrainWeb.ai - AI Orchestration",
   description: "Enterprise Multi-Agent Orchestration Engine",
 };
 
@@ -20,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${outfit.variable}`} suppressHydrationWarning>
-        <div className="app-container">
+        <div className="app-container" suppressHydrationWarning>
           <main className="main-content">
             {children}
           </main>

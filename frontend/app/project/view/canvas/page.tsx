@@ -37,7 +37,7 @@ export default function CanvasView() {
     setProjectId(params.get('id'));
   }, []);
 
-  const storageKey = projectId ? `ingot_canvas_${projectId}` : null;
+  const storageKey = projectId ? `brainweb_canvas_${projectId}` : null;
 
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);

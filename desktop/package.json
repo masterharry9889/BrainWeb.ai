@@ -1,7 +1,7 @@
 {
-  "name": "ingot-desktop",
+  "name": "brainweb-desktop",
   "version": "1.0.0",
-  "description": "INGOT.ai Desktop App",
+  "description": "BrainWeb.ai Desktop App",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -9,8 +9,8 @@
     "dist": "electron-builder"
   },
   "build": {
-    "appId": "com.ingot.desktop",
-    "productName": "INGOT.ai",
+    "appId": "com.brainweb.desktop",
+    "productName": "BrainWeb.ai",
     "directories": {
       "output": "dist"
     },
@@ -19,8 +19,8 @@
       "icon": "icon.ico",
       "extraResources": [
         {
-          "from": "../backend/dist/ingot-backend.exe",
-          "to": "ingot-backend.exe"
+          "from": "../backend/dist/brainweb-backend.exe",
+          "to": "brainweb-backend.exe"
         },
         {
           "from": "../frontend/out",
@@ -32,8 +32,8 @@
       "target": "dmg",
       "extraResources": [
         {
-          "from": "../backend/dist/ingot-backend",
-          "to": "ingot-backend"
+          "from": "../backend/dist/brainweb-backend",
+          "to": "brainweb-backend"
         },
         {
           "from": "../frontend/out",
@@ -46,8 +46,8 @@
       "icon": "icon.png",
       "extraResources": [
         {
-          "from": "../backend/dist/ingot-backend",
-          "to": "ingot-backend"
+          "from": "../backend/dist/brainweb-backend",
+          "to": "brainweb-backend"
         },
         {
           "from": "../frontend/out",

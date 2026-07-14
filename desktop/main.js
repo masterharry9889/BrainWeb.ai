@@ -28,7 +28,7 @@ function createWindow() {
 function startBackend() {
   return new Promise((resolve, reject) => {
     const isWin = process.platform === 'win32';
-    const binaryName = isWin ? 'ingot-backend.exe' : 'ingot-backend';
+    const binaryName = isWin ? 'brainweb-backend.exe' : 'brainweb-backend';
 
     const backendPath = app.isPackaged 
       ? path.join(process.resourcesPath, binaryName)

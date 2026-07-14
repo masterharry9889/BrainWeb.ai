@@ -167,9 +167,6 @@ async def websocket_endpoint(websocket: WebSocket, run_id: str):
 
 @router.post("/settings", response_model=SettingsOutput)
 async def update_settings(settings: SettingsInput, db: AsyncSession = Depends(get_db)):
-    if len(settings.api_key) < 10:
-        raise HTTPException(status_code=400, detail="Invalid API Key format")
-
     result = await db.execute(
         select(UserSettings).where(
             (UserSettings.user_id == DEFAULT_USER_ID) & 
@@ -177,25 +174,38 @@ async def update_settings(settings: SettingsInput, db: AsyncSession = Depends(ge
         )
     )
     user_setting = result.scalars().first()
-    encrypted_key = encrypt_api_key(settings.api_key)
-
-    if user_setting:
-        user_setting.provider = settings.provider
-        user_setting.api_key_encrypted = encrypted_key
+    
+    if not settings.api_key and user_setting:
+        # Keep existing API key, just update model
         user_setting.model_name = settings.model_name
+        # Mask the decrypted existing key for output
+        from ..core.security import decrypt_api_key
+        raw_key = decrypt_api_key(user_setting.api_key_encrypted)
+        masked = mask_api_key(raw_key)
     else:
-        user_setting = UserSettings(
-            user_id=DEFAULT_USER_ID,
-            provider=settings.provider,
-            api_key_encrypted=encrypted_key,
-            model_name=settings.model_name
-        )
-        db.add(user_setting)
+        if len(settings.api_key) < 10:
+            raise HTTPException(status_code=400, detail="Invalid API Key format")
+            
+        encrypted_key = encrypt_api_key(settings.api_key)
+        masked = mask_api_key(settings.api_key)
+
+        if user_setting:
+            user_setting.provider = settings.provider
+            user_setting.api_key_encrypted = encrypted_key
+            user_setting.model_name = settings.model_name
+        else:
+            user_setting = UserSettings(
+                user_id=DEFAULT_USER_ID,
+                provider=settings.provider,
+                api_key_encrypted=encrypted_key,
+                model_name=settings.model_name
+            )
+            db.add(user_setting)
         
     await db.commit()
     return SettingsOutput(
         provider=user_setting.provider,
-        api_key_masked=mask_api_key(settings.api_key),
+        api_key_masked=masked,
         model_name=user_setting.model_name
     )
 

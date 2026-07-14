@@ -7,8 +7,13 @@ class InMemoryPubSub:
     def __init__(self):
         self.subscribers = {}
         self.psubscribers = {}
+        self.history = {}
 
     async def publish(self, channel: str, message: str):
+        if channel not in self.history:
+            self.history[channel] = []
+        self.history[channel].append(message)
+        
         # Exact channel match
         if channel in self.subscribers:
             for queue in self.subscribers[channel]:
@@ -25,6 +30,11 @@ class InMemoryPubSub:
             self.subscribers[channel] = []
         q = asyncio.Queue()
         self.subscribers[channel].append(q)
+        
+        if channel in self.history:
+            for msg in self.history[channel]:
+                q.put_nowait({"type": "message", "channel": channel, "data": msg})
+                
         return q
 
     def unsubscribe(self, channel: str, q: asyncio.Queue):

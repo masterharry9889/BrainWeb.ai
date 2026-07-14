@@ -1,13 +1,15 @@
 import os
 from cryptography.fernet import Fernet
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+env_path = Path(__file__).parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 # In a real app, this MUST come from an environment variable and never be committed.
-SECRET_KEY = os.environ.get("INGOT_SECRET_KEY")
+SECRET_KEY = os.environ.get("BrainWeb_SECRET_KEY")
 if not SECRET_KEY:
-    raise ValueError("INGOT_SECRET_KEY environment variable is missing. Please set it securely.")
+    raise ValueError("BrainWeb_SECRET_KEY environment variable is missing. Please set it securely.")
 fernet = Fernet(SECRET_KEY.encode('utf-8'))
 
 def encrypt_api_key(api_key: str) -> str:

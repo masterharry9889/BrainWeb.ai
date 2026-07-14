@@ -52,8 +52,8 @@ export default function ChatView() {
   useEffect(() => {
     if (!projectId) return;
     
-    const newChatsKey = `ingot_chats_${projectId}`;
-    const legacyKey = `ingot_chat_${projectId}`;
+    const newChatsKey = `brainweb_chats_${projectId}`;
+    const legacyKey = `brainweb_chat_${projectId}`;
     
     const savedChats = localStorage.getItem(newChatsKey);
     let currentChats = [{ id: 'default', name: 'Default Chat' }];
@@ -66,7 +66,7 @@ export default function ChatView() {
       // Migration check
       const legacyData = localStorage.getItem(legacyKey);
       if (legacyData) {
-        localStorage.setItem(`ingot_chat_${projectId}_default`, legacyData);
+        localStorage.setItem(`brainweb_chat_${projectId}_default`, legacyData);
       }
       localStorage.setItem(newChatsKey, JSON.stringify(currentChats));
     }
@@ -81,10 +81,10 @@ export default function ChatView() {
   // Persist chats array
   useEffect(() => {
     if (!projectId || !isLoaded) return;
-    localStorage.setItem(`ingot_chats_${projectId}`, JSON.stringify(chats));
+    localStorage.setItem(`brainweb_chats_${projectId}`, JSON.stringify(chats));
   }, [chats, isLoaded, projectId]);
 
-  const storageKey = projectId && activeChatId ? `ingot_chat_${projectId}_${activeChatId}` : '';
+  const storageKey = projectId && activeChatId ? `brainweb_chat_${projectId}_${activeChatId}` : '';
 
   // Load messages for the active chat
   useEffect(() => {
@@ -153,7 +153,7 @@ export default function ChatView() {
         setActiveChatId(newChats[0].id);
       }
     }
-    localStorage.removeItem(`ingot_chat_${projectId}_${id}`);
+    localStorage.removeItem(`brainweb_chat_${projectId}_${id}`);
   };
 
   const startRenameChat = (chat: {id: string, name: string}, e: React.MouseEvent) => {
@@ -173,7 +173,7 @@ export default function ChatView() {
   };
 
   const handleSend = async () => {
-    const activeAgentsKey = `ingot_active_agents_${projectId}`;
+    const activeAgentsKey = `brainweb_active_agents_${projectId}`;
     const savedAgents = localStorage.getItem(activeAgentsKey);
     let activeAgentsToRun: string[] = [];
     if (savedAgents) {
@@ -194,104 +194,94 @@ export default function ChatView() {
     if (!input.trim() || isProcessing) return;
 
     const userMsgId = Date.now().toString();
+    const orchestratorMsgId = `${Date.now() + 1}`;
     
-    const newAgentMessages = activeAgentsToRun.map((agentId, index) => ({
-      id: `${Date.now() + 1 + index}`,
-      role: 'agent' as const,
-      content: '',
-      status: 'streaming' as const,
-      agentName: agents.find(a => a.id === agentId)?.name || agentId
-    }));
-
     setMessages(prev => [
       ...prev,
       { id: userMsgId, role: 'user', content: input },
-      ...newAgentMessages
+      { 
+        id: orchestratorMsgId, 
+        role: 'agent', 
+        content: '', 
+        status: 'streaming', 
+        agentName: 'Orchestrator' 
+      }
     ]);
     
     const currentInput = input;
     setInput('');
     setIsProcessing(true);
 
-    let finishedCount = 0;
-    const checkAllFinished = () => {
-      finishedCount++;
-      if (finishedCount === activeAgentsToRun.length) {
-        setIsProcessing(false);
+    try {
+      const res = await fetch(`${API_BASE}/agents/run`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          agent_id: "orchestrator-agent",
+          project_id: projectId,
+          input: { 
+            query: currentInput,
+            sub_agents: activeAgentsToRun
+          } 
+        })
+      });
+
+      if (!res.ok) {
+        if (res.status === 403) throw new Error("API Key not configured. Please configure it in the Dashboard.");
+        throw new Error(`Failed to start orchestrator-agent`);
       }
-    };
 
-    activeAgentsToRun.forEach(async (agentId, index) => {
-      const agentMsgId = newAgentMessages[index].id;
-      try {
-        const res = await fetch(`${API_BASE}/agents/run`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            agent_id: agentId,
-            project_id: projectId,
-            input: { query: currentInput } 
-          })
-        });
-
-        if (!res.ok) {
-          if (res.status === 403) throw new Error("API Key not configured. Please configure it in the Dashboard.");
-          throw new Error(`Failed to start agent ${agentId}`);
-        }
-
-        const { run_id } = await res.json();
-        
-        const ws = new WebSocket(`${WS_BASE}/runs/${run_id}`);
-        
-        ws.onmessage = (event) => {
-          const data = JSON.parse(event.data);
-          if (data.type === 'run.token') {
-            setMessages(prev => prev.map(msg => 
-              msg.id === agentMsgId ? { ...msg, content: msg.content + data.data.token } : msg
-            ));
-          } else if (data.type === 'run.finished') {
-            setMessages(prev => prev.map(msg => 
-              msg.id === agentMsgId ? { 
-                ...msg, 
-                status: 'finished',
-                parsedData: data.data.output
-              } : msg
-            ));
-            ws.close();
-            checkAllFinished();
-          } else if (data.type === 'run.error') {
-            setMessages(prev => prev.map(msg => 
-              msg.id === agentMsgId ? { ...msg, status: 'error', content: `Error: ${data.data.error}` } : msg
-            ));
-            ws.close();
-            checkAllFinished();
-          }
-        };
-        
-        ws.onerror = () => {
+      const { run_id } = await res.json();
+      const ws = new WebSocket(`${WS_BASE}/runs/${run_id}`);
+      
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'run.token') {
           setMessages(prev => prev.map(msg => 
-            msg.id === agentMsgId && msg.status === 'streaming' ? { ...msg, status: 'error', content: 'WebSocket connection error' } : msg
+            msg.id === orchestratorMsgId ? { ...msg, content: msg.content + data.data.token } : msg
           ));
-        };
-        
-        ws.onclose = () => {
-          setMessages(prev => {
-            const isStillStreaming = prev.some(msg => msg.id === agentMsgId && msg.status === 'streaming');
-            if (isStillStreaming) {
-               checkAllFinished();
-               return prev.map(msg => msg.id === agentMsgId && msg.status === 'streaming' ? { ...msg, status: 'error', content: msg.content + '\n\n[Connection closed unexpectedly]' } : msg);
-            }
-            return prev;
-          });
-        };
-
-      } catch (error: any) {
+        } else if (data.type === 'run.finished') {
+          setMessages(prev => prev.map(msg => 
+            msg.id === orchestratorMsgId ? { 
+              ...msg, 
+              status: 'finished',
+              parsedData: data.data.output
+            } : msg
+          ));
+          ws.close();
+          setIsProcessing(false);
+        } else if (data.type === 'run.error') {
+          setMessages(prev => prev.map(msg => 
+            msg.id === orchestratorMsgId ? { ...msg, status: 'error', content: msg.content + `\n\nError: ${data.data.error}` } : msg
+          ));
+          ws.close();
+          setIsProcessing(false);
+        }
+      };
+      
+      ws.onerror = () => {
         setMessages(prev => prev.map(msg => 
-          msg.id === agentMsgId ? { ...msg, status: 'error', content: error.message } : msg
+          msg.id === orchestratorMsgId && msg.status === 'streaming' ? { ...msg, status: 'error', content: msg.content + '\n\nWebSocket connection error' } : msg
         ));
-        checkAllFinished();
-      }
-    });
+      };
+      
+      ws.onclose = () => {
+        setMessages(prev => {
+          const isStillStreaming = prev.some(msg => msg.id === orchestratorMsgId && msg.status === 'streaming');
+          if (isStillStreaming) {
+             setIsProcessing(false);
+             return prev.map(msg => msg.id === orchestratorMsgId && msg.status === 'streaming' ? { ...msg, status: 'error', content: msg.content + '\n\n[Connection closed unexpectedly]' } : msg);
+          }
+          return prev;
+        });
+      };
+
+    } catch (error: any) {
+      setMessages(prev => prev.map(msg => 
+        msg.id === orchestratorMsgId ? { ...msg, status: 'error', content: error.message } : msg
+      ));
+      setIsProcessing(false);
+    }
   };
 
   if (!projectId) return null;

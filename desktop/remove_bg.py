@@ -2,7 +2,7 @@ import sys
 from PIL import Image
 
 def process():
-    input_path = r'd:\INGOT.ai\frontend\logo\21b08db87f66fdbe20e5f52fa9ddb93f.webp'
+    input_path = r'd:\BrainWeb.ai\frontend\logo\21b08db87f66fdbe20e5f52fa9ddb93f.webp'
     
     input_img = Image.open(input_path).convert("RGBA")
     data = input_img.getdata()
@@ -23,16 +23,16 @@ def process():
     print("Original webp updated.")
     
     # Update public logo
-    output_img.save(r'd:\INGOT.ai\frontend\public\logo.webp', format="WEBP")
+    output_img.save(r'd:\BrainWeb.ai\frontend\public\logo.webp', format="WEBP")
     
     # Regenerate ICO
     icon_sizes = [(256, 256), (128, 128), (64, 64), (48, 48), (32, 32), (16, 16)]
-    output_img.save(r'd:\INGOT.ai\desktop\icon.ico', format='ICO', sizes=icon_sizes)
+    output_img.save(r'd:\BrainWeb.ai\desktop\icon.ico', format='ICO', sizes=icon_sizes)
     
     # Regenerate PNGs
     img_large = output_img.resize((512, 512), Image.Resampling.LANCZOS)
-    img_large.save(r'd:\INGOT.ai\desktop\build\icon.png', format='PNG')
-    img_large.save(r'd:\INGOT.ai\frontend\app\icon.png', format='PNG')
+    img_large.save(r'd:\BrainWeb.ai\desktop\build\icon.png', format='PNG')
+    img_large.save(r'd:\BrainWeb.ai\frontend\app\icon.png', format='PNG')
     
     print("All icons regenerated with transparent background.")
 

@@ -49,7 +49,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ingot-desktop-${{ matrix.os }}
+          name: brainweb-desktop-${{ matrix.os }}
           path: desktop/dist/*.exe
           if-no-files-found: ignore
           
@@ -57,12 +57,12 @@ jobs:
         uses: actions/upload-artifact@v4
         if: matrix.os == 'macos-latest'
         with:
-          name: ingot-desktop-mac
+          name: brainweb-desktop-mac
           path: desktop/dist/*.dmg
           
       - name: Upload Linux Artifacts
         uses: actions/upload-artifact@v4
         if: matrix.os == 'ubuntu-latest'
         with:
-          name: ingot-desktop-linux
+          name: brainweb-desktop-linux
           path: desktop/dist/*.AppImage

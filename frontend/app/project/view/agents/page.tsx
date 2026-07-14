@@ -18,7 +18,7 @@ export default function AgentsView() {
     const params = new URLSearchParams(window.location.search);
     setProjectId(params.get('id'));
   }, []);
-  const storageKey = projectId ? `ingot_active_agents_${projectId}` : null;
+  const storageKey = projectId ? `brainweb_active_agents_${projectId}` : null;
 
   const [agents, setAgents] = useState<Agent[]>([]);
   const [activeAgents, setActiveAgents] = useState<string[]>([]);

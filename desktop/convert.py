@@ -2,9 +2,9 @@ import sys
 from PIL import Image
 
 def convert():
-    input_path = r'd:\INGOT.ai\frontend\logo\21b08db87f66fdbe20e5f52fa9ddb93f.webp'
-    output_ico = r'd:\INGOT.ai\desktop\icon.ico'
-    output_png = r'd:\INGOT.ai\desktop\build\icon.png'
+    input_path = r'd:\BrainWeb.ai\frontend\logo\21b08db87f66fdbe20e5f52fa9ddb93f.webp'
+    output_ico = r'd:\BrainWeb.ai\desktop\icon.ico'
+    output_png = r'd:\BrainWeb.ai\desktop\build\icon.png'
     
     try:
         img = Image.open(input_path)

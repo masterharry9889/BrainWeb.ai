@@ -5,7 +5,7 @@ backend_dir = os.path.dirname(os.path.abspath(__file__))
 
 PyInstaller.__main__.run([
     os.path.join(backend_dir, 'main.py'),
-    '--name=ingot-backend',
+    '--name=brainweb-backend',
     '--onefile',
     '--hidden-import=uvicorn',
     '--hidden-import=fastapi',

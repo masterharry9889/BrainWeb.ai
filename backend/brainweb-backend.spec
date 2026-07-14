@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['D:\\INGOT.ai\\backend\\main.py'],
+    ['D:\\BrainWeb.ai\\backend\\main.py'],
     pathex=[],
     binaries=[],
     datas=[],
@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='ingot-backend',
+    name='brainweb-backend',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
