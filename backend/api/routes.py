@@ -4,12 +4,12 @@ from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from ..core.schemas import AgentSpec, RunInput, RunResponse, SettingsInput, SettingsOutput, NodeUpdateInput, NodeMergeInput, EdgeCreateInput
-from ..core.orchestrator import orchestrator
-from ..services.pubsub import subscribe_events
-from ..database import get_db
-from ..models import UserSettings, CustomAgent
-from ..core.security import encrypt_api_key, mask_api_key
+from core.schemas import AgentSpec, RunInput, RunResponse, SettingsInput, SettingsOutput, NodeUpdateInput, NodeMergeInput, EdgeCreateInput
+from core.orchestrator import orchestrator
+from services.pubsub import subscribe_events
+from database import get_db
+from models import UserSettings, CustomAgent
+from core.security import encrypt_api_key, mask_api_key
 
 router = APIRouter()
 DEFAULT_USER_ID = "default_user"
@@ -179,7 +179,7 @@ async def update_settings(settings: SettingsInput, db: AsyncSession = Depends(ge
         # Keep existing API key, just update model
         user_setting.model_name = settings.model_name
         # Mask the decrypted existing key for output
-        from ..core.security import decrypt_api_key
+        from core.security import decrypt_api_key
         raw_key = decrypt_api_key(user_setting.api_key_encrypted)
         masked = mask_api_key(raw_key)
     else:
@@ -214,7 +214,7 @@ async def get_settings(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(UserSettings).where(UserSettings.user_id == DEFAULT_USER_ID))
     user_settings = result.scalars().all()
     
-    from ..core.security import decrypt_api_key
+    from core.security import decrypt_api_key
     outputs = []
     for s in user_settings:
         raw_key = decrypt_api_key(s.api_key_encrypted)
@@ -242,7 +242,7 @@ async def delete_settings(provider: str, db: AsyncSession = Depends(get_db)):
     return {"status": "success"}
 
 # --- GRAPH ROUTES ---
-from ..models import Node, Edge
+from models import Node, Edge
 
 @router.get("/graph/{project_id}")
 async def get_graph(project_id: str, db: AsyncSession = Depends(get_db)):
@@ -302,7 +302,7 @@ async def update_node(node_id: str, input: NodeUpdateInput, db: AsyncSession = D
     node.type = input.type
     await db.commit()
     
-    from ..services.pubsub import publish_event
+    from services.pubsub import publish_event
     await publish_event("graph:live", "graph.update", {
         "project_id": node.project_id,
         "nodes": [{"id": node.id, "label": node.label, "type": node.type, "action": "updated"}],
@@ -323,7 +323,7 @@ async def delete_node_route(node_id: str, db: AsyncSession = Depends(get_db)):
     await db.execute(delete(Node).where(Node.id == node_id))
     await db.commit()
     
-    from ..services.pubsub import publish_event
+    from services.pubsub import publish_event
     await publish_event("graph:live", "graph.update", {
         "project_id": project_id,
         "nodes": [{"id": node_id, "action": "deleted"}],
@@ -362,7 +362,7 @@ async def merge_node(node_id: str, input: NodeMergeInput, db: AsyncSession = Dep
     await db.execute(delete(Node).where(Node.id == node_id))
     await db.commit()
     
-    from ..services.pubsub import publish_event
+    from services.pubsub import publish_event
     await publish_event("graph:live", "graph.update", {
         "project_id": src_node.project_id,
         "nodes": [
@@ -388,7 +388,7 @@ async def create_edge(input: EdgeCreateInput, db: AsyncSession = Depends(get_db)
     db.add(new_edge)
     await db.commit()
     
-    from ..services.pubsub import publish_event
+    from services.pubsub import publish_event
     await publish_event("graph:live", "graph.update", {
         "project_id": input.project_id,
         "nodes": [],
