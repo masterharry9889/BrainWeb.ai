@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, dialog } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const http = require('http');
@@ -40,7 +40,10 @@ function startBackend() {
 
     console.log("Starting backend at:", backendPath);
     
-    backendProcess = spawn(backendPath, [], { detached: false });
+    backendProcess = spawn(backendPath, [], { 
+      cwd: path.dirname(backendPath),
+      detached: false 
+    });
 
     backendProcess.stdout.on('data', (data) => {
       console.log(`Backend stdout: ${data}`);
@@ -80,6 +83,7 @@ app.on('ready', async () => {
     createWindow();
   } catch (err) {
     console.error("Failed to initialize app:", err);
+    dialog.showErrorBox('Startup Failed', `Backend failed to start:\n${err.message}`);
     app.quit();
   }
 });
