@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['D:\\BrainWeb.ai\\backend\\run_backend.py'],
+    ['D:\\BrainWeb.ai\\backend\\main.py'],
     pathex=[],
     binaries=[],
     datas=[],
