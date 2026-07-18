@@ -3,26 +3,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, Bot, User, Plus, Trash2, Edit2, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import CursorTrackingLink from '@/app/components/CursorTrackingLink';
-
 import { API_BASE_URL as API_BASE } from '@/lib/config';
 const WS_BASE = API_BASE.replace(/^http/, 'ws');
+import ChatSidebar from '@/app/components/ChatSidebar';
+import ChatMessageArea, { Message } from '@/app/components/ChatMessageArea';
 
 interface Agent {
   id: string;
   name: string;
   description: string;
-}
-
-interface Message {
-  id: string;
-  role: 'user' | 'agent';
-  content: string;
-  status?: 'streaming' | 'finished' | 'error';
-  agentName?: string;
-  parsedData?: any;
 }
 
 export default function ChatView() {
@@ -289,130 +278,26 @@ export default function ChatView() {
   return (
     <div style={{ display: 'flex', height: '100%', width: '100%', paddingTop: '5rem' }}>
       
-      {/* Sidebar for multiple chats */}
-      <div className="sidebar" style={{ width: '260px', borderRight: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', background: 'var(--bg-secondary)', padding: '1.5rem', zIndex: 10 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <h2 style={{ fontSize: '1.2rem', margin: 0, fontFamily: 'Outfit', fontWeight: 600, color: 'white' }}>Chats</h2>
-          <button className="notch-icon-btn" style={{ margin: 0, width: '32px', height: '32px' }} onClick={createNewChat} title="New Chat">
-            <Plus size={18} />
-          </button>
-        </div>
-        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          {chats.map(chat => (
-            <div 
-              key={chat.id} 
-              onClick={() => setActiveChatId(chat.id)}
-              style={{ 
-                padding: '0.75rem', 
-                borderRadius: '8px', 
-                background: activeChatId === chat.id ? 'rgba(255,255,255,0.08)' : 'transparent',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                transition: 'all 0.2s ease',
-                borderLeft: activeChatId === chat.id ? '2px solid var(--primary)' : '2px solid transparent',
-                color: activeChatId === chat.id ? 'var(--text-primary)' : 'var(--text-secondary)'
-              }}
-              onMouseEnter={(e) => { if(activeChatId !== chat.id) e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
-              onMouseLeave={(e) => { if(activeChatId !== chat.id) e.currentTarget.style.background = 'transparent'; }}
-            >
-              {editingChatId === chat.id ? (
-                <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '0.5rem' }}>
-                  <input 
-                    autoFocus
-                    value={editingChatName}
-                    onChange={(e) => setEditingChatName(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && saveRenameChat(e)}
-                    onBlur={() => saveRenameChat()}
-                    onClick={(e) => e.stopPropagation()}
-                    style={{ flex: 1, width: '100%', background: '#000', border: '1px solid var(--primary)', color: 'white', padding: '0.25rem 0.5rem', borderRadius: '4px', outline: 'none', fontSize: '0.9rem' }}
-                  />
-                  <button onClick={saveRenameChat} style={{ background: 'none', border: 'none', color: 'var(--success)', cursor: 'pointer', padding: 0 }}><Check size={16} /></button>
-                </div>
-              ) : (
-                <>
-                  <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, fontWeight: 500, fontSize: '0.95rem' }}>
-                    {chat.name}
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.4rem', opacity: activeChatId === chat.id ? 1 : 0.5, transition: 'opacity 0.2s' }}>
-                    <button onClick={(e) => startRenameChat(chat, e)} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: '0.1rem' }} title="Rename">
-                      <Edit2 size={14} style={{ transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = 'var(--primary)'} onMouseLeave={e => e.currentTarget.style.color = 'inherit'} />
-                    </button>
-                    <button onClick={(e) => deleteChat(chat.id, e)} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: '0.1rem' }} title="Delete">
-                      <Trash2 size={14} style={{ transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#ef4444'} onMouseLeave={e => e.currentTarget.style.color = 'inherit'} />
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="chat-container" style={{ flex: 1, padding: '2rem 10%', height: 'calc(100vh - 5rem)', position: 'relative' }}>
-        <div className="chat-messages" style={{ height: 'calc(100% - 80px)' }}>
-          {messages.length === 0 && (
-            <div style={{ margin: 'auto', textAlign: 'center', color: 'var(--text-secondary)' }}>
-              <Bot size={48} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
-              <h3>Select an agent and start chatting</h3>
-            </div>
-          )}
-          
-          {messages.map(msg => (
-            <div key={msg.id} className={`chat-message ${msg.role}`}>
-              <div className={`avatar ${msg.role}`}>
-                {msg.role === 'user' ? <User size={20} color="white" /> : <Bot size={20} color="white" />}
-              </div>
-              <div className="message-bubble">
-                <div className={`markdown-body ${msg.role}`}>
-                  <ReactMarkdown 
-                    remarkPlugins={[remarkGfm]}
-                    components={{
-                      a: CursorTrackingLink
-                    }}
-                  >
-                    {msg.content.replace(/```json[\s\S]*?```/g, '').trim()}
-                  </ReactMarkdown>
-                </div>
-                {msg.role === 'agent' && msg.status === 'streaming' && (
-                  <span style={{ display: 'inline-block', width: '8px', height: '16px', background: 'var(--primary)', marginLeft: '4px', animation: 'pulse 1s infinite' }} />
-                )}
-                {msg.parsedData && msg.parsedData.entities && msg.parsedData.entities.length > 0 && (
-                  <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', fontSize: '0.85rem' }}>
-                    <strong>Extracted Entities:</strong>
-                    <ul style={{ margin: '0.5rem 0 0 1.5rem' }}>
-                      {msg.parsedData.entities.map((e: any, i: number) => (
-                        <li key={i}>{e.label} <span style={{ color: 'var(--text-secondary)' }}>({e.type})</span></li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-          <div ref={messagesEndRef} />
-        </div>
-
-        <div className="chat-input-area" style={{ position: 'absolute', bottom: '2rem', left: '10%', right: '10%' }}>
-          <input 
-            type="text" 
-            className="chat-input" 
-            placeholder="Type your request here..." 
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleSend()}
-            disabled={isProcessing}
-          />
-          <button 
-            className="send-btn" 
-            onClick={handleSend}
-            disabled={isProcessing || !input.trim()}
-          >
-            <Send size={18} />
-          </button>
-        </div>
-      </div>
+      <ChatSidebar 
+        chats={chats}
+        activeChatId={activeChatId}
+        setActiveChatId={setActiveChatId}
+        editingChatId={editingChatId}
+        editingChatName={editingChatName}
+        setEditingChatName={setEditingChatName}
+        saveRenameChat={saveRenameChat}
+        startRenameChat={startRenameChat}
+        deleteChat={deleteChat}
+        createNewChat={createNewChat}
+      />
+      <ChatMessageArea 
+        messages={messages}
+        input={input}
+        setInput={setInput}
+        handleSend={handleSend}
+        isProcessing={isProcessing}
+        messagesEndRef={messagesEndRef}
+      />
     </div>
   );
 }
