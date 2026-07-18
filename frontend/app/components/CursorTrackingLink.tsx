@@ -4,7 +4,12 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Globe, Network } from 'lucide-react';
 
-export default function CursorTrackingLink({ href, children, ...props }: any) {
+interface CursorTrackingLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+  href?: string;
+  children?: React.ReactNode;
+}
+
+export default function CursorTrackingLink({ href, children, ...props }: CursorTrackingLinkProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [coords, setCoords] = useState({ x: 0, y: 0 });
   const [mounted, setMounted] = useState(false);

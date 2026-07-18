@@ -2,10 +2,7 @@ import React from 'react';
 import { Plus, Edit2, Trash2, Check } from 'lucide-react';
 import styles from '../project/view/chat/chat.module.css';
 
-export interface Chat {
-  id: string;
-  name: string;
-}
+import { Chat } from '@/lib/types';
 
 interface ChatSidebarProps {
   chats: Chat[];

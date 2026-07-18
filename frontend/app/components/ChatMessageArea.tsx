@@ -5,14 +5,7 @@ import remarkGfm from 'remark-gfm';
 import CursorTrackingLink from '@/app/components/CursorTrackingLink';
 import styles from '../project/view/chat/chat.module.css';
 
-export interface Message {
-  id: string;
-  role: 'user' | 'agent';
-  content: string;
-  status?: 'streaming' | 'finished' | 'error';
-  agentName?: string;
-  parsedData?: any;
-}
+import { Message, Entity } from '@/lib/types';
 
 interface ChatMessageAreaProps {
   messages: Message[];
@@ -64,7 +57,7 @@ export default function ChatMessageArea({
                 <div className={styles.entitiesContainer}>
                   <strong>Extracted Entities:</strong>
                   <ul className={styles.entitiesList}>
-                    {msg.parsedData.entities.map((e: any, i: number) => (
+                    {msg.parsedData.entities.map((e: Entity, i: number) => (
                       <li key={i}>{e.label} <span className={styles.entityType}>({e.type})</span></li>
                     ))}
                   </ul>

@@ -1,11 +1,12 @@
 import React from 'react';
 import { X, Save, Trash2, Link as LinkIcon, GitMerge } from 'lucide-react';
 import styles from '../project/view/graph/graph.module.css';
+import { GraphNode } from '@/lib/types';
 
 interface NodeEditorPanelProps {
   editMode: boolean;
   panelOpen: boolean;
-  selectedNode: any;
+  selectedNode: GraphNode | null;
   closePanel: () => void;
   editLabel: string;
   setEditLabel: (val: string) => void;
@@ -13,8 +14,8 @@ interface NodeEditorPanelProps {
   setEditType: (val: string) => void;
   handleUpdateNode: () => void;
   handleDeleteNode: () => void;
-  setConnectSource: (node: any) => void;
-  setMergeSource: (node: any) => void;
+  setConnectSource: (node: GraphNode | null) => void;
+  setMergeSource: (node: GraphNode | null) => void;
   setPanelOpen: (val: boolean) => void;
 }
 

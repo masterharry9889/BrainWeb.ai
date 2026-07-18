@@ -5,16 +5,17 @@ import { Save, Plus, Trash2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 import { API_BASE_URL as API_BASE } from '@/lib/config';
+import { Agent, Setting } from '@/lib/types';
 
 export default function SettingsView() {
   const [settings, setSettings] = useState({ provider: 'anthropic', api_key: '', model_name: 'claude-3-5-sonnet-20240620' });
   const [maskedKey, setMaskedKey] = useState('');
   const [saveStatus, setSaveStatus] = useState('');
   
-  const [customAgents, setCustomAgents] = useState<any[]>([]);
+  const [customAgents, setCustomAgents] = useState<Agent[]>([]);
   const [newAgent, setNewAgent] = useState({ id: '', name: '', description: '', system_prompt: '' });
 
-  const [settingsList, setSettingsList] = useState<any[]>([]);
+  const [settingsList, setSettingsList] = useState<Setting[]>([]);
 
   useEffect(() => {
     fetch(`${API_BASE}/settings`)
@@ -57,8 +58,8 @@ export default function SettingsView() {
       setSettings({ ...settings, api_key: '' });
       setSaveStatus('Saved successfully!');
       setTimeout(() => setSaveStatus(''), 3000);
-    } catch (e: any) {
-      setSaveStatus(e.message);
+    } catch (e: unknown) {
+      setSaveStatus(e instanceof Error ? e.message : String(e));
     }
   };
 
@@ -95,13 +96,13 @@ export default function SettingsView() {
     }
   };
 
-  const handleEditSettings = (s: any) => {
+  const handleEditSettings = (s: Setting) => {
     setSettings({
       provider: s.provider,
       model_name: s.model_name,
       api_key: '' // Leave blank so user doesn't see raw string, but they can enter a new one
     });
-    setMaskedKey(s.api_key_masked);
+    setMaskedKey(s.api_key_masked || '');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

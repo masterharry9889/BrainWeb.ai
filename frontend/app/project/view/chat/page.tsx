@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import { API_BASE_URL as API_BASE } from '@/lib/config';
 const WS_BASE = API_BASE.replace(/^http/, 'ws');
 import ChatSidebar from '@/app/components/ChatSidebar';
-import ChatMessageArea, { Message } from '@/app/components/ChatMessageArea';
+import ChatMessageArea from '@/app/components/ChatMessageArea';
+import { Message, Chat } from '@/lib/types';
 import styles from './chat.module.css';
 
 interface Agent {
@@ -266,9 +267,10 @@ export default function ChatView() {
         });
       };
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       setMessages(prev => prev.map(msg => 
-        msg.id === orchestratorMsgId ? { ...msg, status: 'error', content: error.message } : msg
+        msg.id === orchestratorMsgId ? { ...msg, status: 'error', content: errorMessage } : msg
       ));
       setIsProcessing(false);
     }

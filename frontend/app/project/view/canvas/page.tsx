@@ -83,7 +83,7 @@ export default function CanvasView() {
       type,
       position: { x: 250 + Math.random() * 100, y: 250 + Math.random() * 100 },
       data: {
-        onChange: (val: any) => {
+        onChange: (val: string) => {
            setNodes(nds => nds.map(n => n.id === newNode.id ? { ...n, data: { ...n.data, url: val, text: val } } : n));
         },
         onDelete: (nodeId: string) => {
@@ -104,7 +104,7 @@ export default function CanvasView() {
              ...n,
              data: {
                ...n.data,
-               onChange: (val: any) => {
+               onChange: (val: string) => {
                  setNodes(currentNds => currentNds.map(cn => cn.id === n.id ? { ...cn, data: { ...cn.data, url: val, text: val } } : cn));
                },
                onDelete: (nodeId: string) => {

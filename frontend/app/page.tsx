@@ -8,7 +8,8 @@ import { API_BASE_URL } from '@/lib/config';
 import { fetchApi } from '@/lib/api';
 
 import DashboardHeader from './components/DashboardHeader';
-import ProjectCard, { Project } from './components/ProjectCard';
+import ProjectCard from './components/ProjectCard';
+import { Project, Chat } from '@/lib/types';
 import CreateProjectModal from './components/CreateProjectModal';
 import styles from './page.module.css';
 
@@ -49,7 +50,7 @@ export default function MainView() {
     if (chatsData) {
       try {
         const chats = JSON.parse(chatsData);
-        chats.forEach((chat: any) => {
+        chats.forEach((chat: Chat) => {
           localStorage.removeItem(`brainweb_chat_${id}_${chat.id}`);
         });
       } catch (err) {}

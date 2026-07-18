@@ -2,7 +2,10 @@ import { Handle, Position } from '@xyflow/react';
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
-export default function TextNode({ id, data, isConnectable }: any) {
+import { NodeProps, Node } from '@xyflow/react';
+import { CustomNodeData } from '@/lib/types';
+
+export default function TextNode({ id, data, isConnectable }: NodeProps<Node<CustomNodeData>>) {
   const [isEditing, setIsEditing] = useState(false);
   const [text, setText] = useState(data.text || "Type your idea here...");
 
@@ -11,7 +14,7 @@ export default function TextNode({ id, data, isConnectable }: any) {
     setText(data.text || "Type your idea here...");
   }, [data.text]);
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const val = e.target.value;
     setText(val);
     if (data.onChange) {

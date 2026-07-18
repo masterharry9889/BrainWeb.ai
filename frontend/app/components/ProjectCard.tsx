@@ -2,12 +2,7 @@ import React from 'react';
 import { Trash2, MessageCircle, Upload, ArrowRight } from 'lucide-react';
 import styles from '../page.module.css';
 
-export interface Project {
-  id: string;
-  name: string;
-  date: string;
-  type: 'conversation' | 'upload';
-}
+import { Project } from '@/lib/types';
 
 interface ProjectCardProps {
   project: Project;

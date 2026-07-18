@@ -2,7 +2,10 @@ import { Handle, Position } from '@xyflow/react';
 import { Image as ImageIcon, X } from 'lucide-react';
 import { useState } from 'react';
 
-export default function ImageNode({ id, data, isConnectable }: any) {
+import { NodeProps, Node } from '@xyflow/react';
+import { CustomNodeData } from '@/lib/types';
+
+export default function ImageNode({ id, data, isConnectable }: NodeProps<Node<CustomNodeData>>) {
   const [url, setUrl] = useState(data.url || "");
   const [isEditing, setIsEditing] = useState(!data.url);
 

@@ -11,6 +11,7 @@ const WS_BASE = API_BASE.replace(/^http/, 'ws');
 
 import NodeEditorPanel from '@/app/components/NodeEditorPanel';
 import styles from './graph.module.css';
+import { GraphNode, GraphEdge, GraphData } from '@/lib/types';
 
 export default function GraphView() {
   const [projectId, setProjectId] = useState<string | null>(null);
@@ -19,21 +20,21 @@ export default function GraphView() {
     const params = new URLSearchParams(window.location.search);
     setProjectId(params.get('id'));
   }, []);
-  const [graphData, setGraphData] = useState<{ nodes: any[]; links: any[] }>({ nodes: [], links: [] });
+  const [graphData, setGraphData] = useState<GraphData>({ nodes: [], links: [] });
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const containerRef = useRef<HTMLDivElement>(null);
   
   // Editor State
   const [editMode, setEditMode] = useState(false);
-  const [selectedNode, setSelectedNode] = useState<any>(null);
+  const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
 
   const [panelOpen, setPanelOpen] = useState(false);
   
   // Interactive Tools
-  const [connectSource, setConnectSource] = useState<any>(null);
-  const [mergeSource, setMergeSource] = useState<any>(null);
+  const [connectSource, setConnectSource] = useState<GraphNode | null>(null);
+  const [mergeSource, setMergeSource] = useState<GraphNode | null>(null);
   
   // Form State
   const [editLabel, setEditLabel] = useState('');
@@ -62,10 +63,10 @@ export default function GraphView() {
       .then(res => res.json())
       .then(data => {
         const formattedData = {
-          nodes: data.nodes.map((n: any) => ({ ...n, val: Math.sqrt(n.mention_count || 1) * 5 })),
-          links: data.edges.map((e: any) => ({ ...e, source: e.source, target: e.target, label: e.type }))
+          nodes: data.nodes.map((n: GraphNode) => ({ ...n, val: Math.sqrt(n.mention_count || 1) * 5 })),
+          links: data.edges.map((e: GraphEdge) => ({ ...e, source: e.source, target: e.target, label: e.type || '' }))
         };
-        setGraphData(formattedData as any);
+        setGraphData(formattedData as GraphData);
       })
       .catch(console.error);
 
@@ -80,8 +81,8 @@ export default function GraphView() {
           const newNodes = [...prev.nodes];
           const newLinks = [...prev.links];
           
-          nodes.forEach((n: any) => {
-            const idx = newNodes.findIndex((existing: any) => existing.id === n.id);
+          nodes.forEach((n: GraphNode) => {
+            const idx = newNodes.findIndex((existing: GraphNode) => existing.id === n.id);
             if (n.action === 'deleted') {
               if (idx >= 0) newNodes.splice(idx, 1);
             } else {
@@ -91,20 +92,20 @@ export default function GraphView() {
             }
           });
           
-          edges.forEach((e: any) => {
-            const idx = newLinks.findIndex((existing: any) => existing.id === e.id);
+          edges.forEach((e: GraphEdge) => {
+            const idx = newLinks.findIndex((existing: GraphEdge) => existing.id === e.id);
             if (e.action === 'deleted') {
               if (idx >= 0) newLinks.splice(idx, 1);
             } else {
-              const formatted = { ...e, source: e.source, target: e.target, label: e.type };
+              const formatted = { ...e, source: e.source, target: e.target, label: e.type || '' };
               if (idx >= 0) newLinks[idx] = { ...newLinks[idx], ...formatted };
               else newLinks.push(formatted);
             }
           });
           
           // Filter out links that reference deleted nodes
-          const validNodes = new Set(newNodes.map((n: any) => n.id));
-          const validLinks = newLinks.filter((l: any) => {
+          const validNodes = new Set(newNodes.map((n: GraphNode) => n.id));
+          const validLinks = newLinks.filter((l: GraphEdge) => {
             const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
             const targetId = typeof l.target === 'object' ? l.target.id : l.target;
             return validNodes.has(sourceId) && validNodes.has(targetId);
@@ -118,7 +119,7 @@ export default function GraphView() {
     return () => ws.close();
   }, [projectId]);
 
-  const nodeColor = useCallback((node: any) => {
+  const nodeColor = useCallback((node: GraphNode) => {
     if (connectSource?.id === node.id) return '#fbbf24'; // Warning yellow for selected source
     if (mergeSource?.id === node.id) return '#f87171'; // Red for merge source
     if (selectedNode?.id === node.id) return '#38bdf8'; // Highlight selected
@@ -160,7 +161,7 @@ export default function GraphView() {
     }
   };
 
-  const handleMergeNodes = async (targetNode: any) => {
+  const handleMergeNodes = async (targetNode: GraphNode) => {
     if (!mergeSource || mergeSource.id === targetNode.id) return;
     if (!confirm(`Merge "${mergeSource.label}" into "${targetNode.label}"?`)) {
       setMergeSource(null);
@@ -179,7 +180,7 @@ export default function GraphView() {
     }
   };
 
-  const handleConnectNodes = async (targetNode: any) => {
+  const handleConnectNodes = async (targetNode: GraphNode) => {
     if (!connectSource || connectSource.id === targetNode.id) return;
     const relationType = prompt(`Enter relationship type from "${connectSource.label}" to "${targetNode.label}":`, "related_to");
     if (!relationType) {
@@ -207,7 +208,7 @@ export default function GraphView() {
 
   // --- UI Handlers ---
 
-  const openPanel = (node: any) => {
+  const openPanel = (node: GraphNode) => {
     setSelectedNode(node);
     setEditLabel(node.label || '');
     setEditType(node.type || '');
@@ -272,7 +273,7 @@ export default function GraphView() {
         <div className={`${styles.editorBanner} ${connectSource ? styles.editorBannerConnect : styles.editorBannerMerge}`}>
           {connectSource ? <LinkIcon size={16} color="#fbbf24" /> : <GitMerge size={16} color="#f87171" />}
           <span>
-            {connectSource ? `Select target node to connect with "${connectSource.label}"` : `Select target node to merge "${mergeSource.label}" into`}
+            {connectSource ? `Select target node to connect with "${connectSource.label}"` : `Select target node to merge "${mergeSource?.label}" into`}
           </span>
           <button 
             onClick={() => { setConnectSource(null); setMergeSource(null); }}
@@ -295,15 +296,15 @@ export default function GraphView() {
               <span style="font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">${node.type}</span>
             </div>
           `}
-          nodeColor={nodeColor}
+          nodeColor={nodeColor as any}
           nodeRelSize={5}
-          nodeCanvasObject={(node: any, ctx: any, globalScale: number) => {
+          nodeCanvasObject={(node: any, ctx: CanvasRenderingContext2D, globalScale: number) => {
             const label = node.label || '';
             const fontSize = Math.max(12 / globalScale, 1);
             
             const radius = 6;
             ctx.beginPath();
-            ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
+            ctx.arc(node.x || 0, node.y || 0, radius, 0, 2 * Math.PI, false);
             
             // Highlight styling
             if (node === selectedNode || node === connectSource || node === mergeSource) {
@@ -312,7 +313,7 @@ export default function GraphView() {
               ctx.stroke();
             }
             
-            ctx.fillStyle = nodeColor(node);
+            ctx.fillStyle = nodeColor(node as GraphNode);
             ctx.fill();
             
             if (globalScale > 0.8) {
@@ -320,13 +321,13 @@ export default function GraphView() {
               ctx.textAlign = 'center';
               ctx.textBaseline = 'middle';
               ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-              ctx.fillText(label, node.x, node.y + radius + 4);
+              ctx.fillText(label, node.x || 0, (node.y || 0) + radius + 4);
             }
           }}
-          nodePointerAreaPaint={(node: any, color: string, ctx: any) => {
+          nodePointerAreaPaint={(node: any, color: string, ctx: CanvasRenderingContext2D) => {
             ctx.fillStyle = color;
             ctx.beginPath();
-            ctx.arc(node.x, node.y, 8, 0, 2 * Math.PI, false);
+            ctx.arc(node.x || 0, node.y || 0, 8, 0, 2 * Math.PI, false);
             ctx.fill();
           }}
           linkDirectionalArrowLength={3.5}
