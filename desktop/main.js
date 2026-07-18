@@ -14,6 +14,7 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
     },
+    autoHideMenuBar: true,
     // icon: path.join(__dirname, 'icon.ico') // Optional: Add if icon exists
   });
 
