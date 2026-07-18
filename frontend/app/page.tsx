@@ -7,12 +7,9 @@ import Link from 'next/link';
 import { API_BASE_URL } from '@/lib/config';
 import { fetchApi } from '@/lib/api';
 
-interface Project {
-  id: string;
-  name: string;
-  date: string;
-  type: 'conversation' | 'upload';
-}
+import DashboardHeader from './components/DashboardHeader';
+import ProjectCard, { Project } from './components/ProjectCard';
+import CreateProjectModal from './components/CreateProjectModal';
 
 export default function MainView() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -138,15 +135,7 @@ export default function MainView() {
       position: 'relative'
     }}>
       {/* Dashboard Minimal Header */}
-      <header style={{ width: '100%', padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div className="logo-small" style={{ fontSize: '1.5rem', padding: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <img src="./logo.webp" alt="BrainWeb Logo" style={{ height: '36px', width: 'auto', borderRadius: '8px' }} />
-          BrainWeb
-        </div>
-        <a href="./settings/index.html" className="notch-icon-btn" style={{ background: 'transparent', margin: 0 }} title="Settings">
-          <Settings size={20} />
-        </a>
-      </header>
+      <DashboardHeader />
       
       <div style={{ width: '100%', padding: '3rem 5%' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
@@ -174,41 +163,7 @@ export default function MainView() {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
             {projects.map(p => (
-              <div 
-                key={p.id} 
-                onClick={() => window.location.href = `./project/view/chat/index.html?id=${p.id}`}
-                className="glass" 
-                style={{ 
-                  padding: '1.5rem', 
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s, background 0.2s',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1rem'
-                }}
-                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'}
-                onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <h3 style={{ margin: 0, fontSize: '1.2rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: '1rem' }}>{p.name}</h3>
-                  <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                    <button 
-                      onClick={(e) => handleDeleteProject(p.id, e)}
-                      style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', transition: 'color 0.2s' }}
-                      onMouseEnter={(e) => e.currentTarget.style.color = '#ef4444'}
-                      onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
-                      title="Delete Project"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                    {p.type === 'conversation' ? <MessageCircle size={20} color="var(--primary)" /> : <Upload size={20} color="var(--secondary)" />}
-                  </div>
-                </div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
-                  <span>Created {p.date}</span>
-                  <ArrowRight size={16} />
-                </div>
-              </div>
+              <ProjectCard key={p.id} project={p} onDelete={handleDeleteProject} />
             ))}
           </div>
         )}
@@ -247,103 +202,17 @@ export default function MainView() {
         <Plus size={32} />
       </button>
 
-      {isModalOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.6)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 100
-        }}>
-          <div className="glass" style={{ width: '100%', maxWidth: '500px', padding: '2rem', animation: 'slideUp 0.3s ease' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h2 style={{ margin: 0, fontSize: '1.5rem' }}>Create New</h2>
-              <button 
-                onClick={() => setIsModalOpen(false)}
-                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
-              >
-                <X size={24} />
-              </button>
-            </div>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
-              <div 
-                onClick={() => setProjectType('conversation')}
-                style={{ 
-                  padding: '1.5rem 1rem', 
-                  borderRadius: '12px', 
-                  border: projectType === 'conversation' ? '2px solid var(--primary)' : '2px solid rgba(255,255,255,0.1)',
-                  background: projectType === 'conversation' ? 'rgba(99, 102, 241, 0.1)' : 'rgba(0,0,0,0.2)',
-                  cursor: 'pointer',
-                  textAlign: 'center',
-                  transition: 'all 0.2s'
-                }}
-              >
-                <MessageCircle size={32} color={projectType === 'conversation' ? 'var(--primary)' : 'var(--text-secondary)'} style={{ margin: '0 auto 0.75rem' }} />
-                <div style={{ fontWeight: 600, color: projectType === 'conversation' ? 'white' : 'var(--text-secondary)' }}>Independent Conversation</div>
-              </div>
-              
-              <div 
-                onClick={() => setProjectType('upload')}
-                style={{ 
-                  padding: '1.5rem 1rem', 
-                  borderRadius: '12px', 
-                  border: projectType === 'upload' ? '2px solid var(--secondary)' : '2px solid rgba(255,255,255,0.1)',
-                  background: projectType === 'upload' ? 'rgba(236, 72, 153, 0.1)' : 'rgba(0,0,0,0.2)',
-                  cursor: 'pointer',
-                  textAlign: 'center',
-                  transition: 'all 0.2s'
-                }}
-              >
-                <Upload size={32} color={projectType === 'upload' ? 'var(--secondary)' : 'var(--text-secondary)'} style={{ margin: '0 auto 0.75rem' }} />
-                <div style={{ fontWeight: 600, color: projectType === 'upload' ? 'white' : 'var(--text-secondary)' }}>Upload New Project</div>
-              </div>
-            </div>
-
-            <div style={{ marginBottom: '2rem' }}>
-              <label className="input-label">Name</label>
-              <input 
-                type="text" 
-                className="input-field" 
-                placeholder={projectType === 'conversation' ? "e.g. Chat with Codebase" : "e.g. Q3 Marketing Plan"}
-                value={projectName}
-                onChange={e => setProjectName(e.target.value)}
-                autoFocus
-                onKeyDown={e => e.key === 'Enter' && handleCreateProject()}
-              />
-            </div>
-            
-            {projectType === 'upload' && (
-              <div style={{ marginBottom: '2rem' }}>
-                <label className="input-label">Select Files to Analyze</label>
-                <input 
-                  type="file" 
-                  multiple
-                  onChange={e => setSelectedFiles(e.target.files)}
-                  style={{
-                    width: '100%',
-                    padding: '1rem',
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px dashed rgba(255,255,255,0.2)',
-                    borderRadius: '8px',
-                    color: 'white'
-                  }}
-                />
-              </div>
-            )}
-            
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-              <button className="btn btn-secondary" onClick={() => setIsModalOpen(false)} disabled={isUploading}>Cancel</button>
-              <button className="btn" onClick={handleCreateProject} disabled={!projectName.trim() || isUploading}>
-                {isUploading ? 'Uploading...' : 'Create'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <CreateProjectModal 
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        projectType={projectType}
+        setProjectType={setProjectType}
+        projectName={projectName}
+        setProjectName={setProjectName}
+        setSelectedFiles={setSelectedFiles}
+        handleCreateProject={handleCreateProject}
+        isUploading={isUploading}
+      />
     </div>
   );
 }
