@@ -123,7 +123,7 @@ export default function MainView() {
     setIsModalOpen(false);
     setIsUploading(false);
     
-    window.location.href = `./project/view/chat/index.html?id=${newProjectId}`;
+    router.push(`/project/view/chat?id=${newProjectId}`);
   };
 
   return (

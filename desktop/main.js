@@ -2,9 +2,17 @@ const { app, BrowserWindow, dialog } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const http = require('http');
-
 let mainWindow;
 let backendProcess;
+let loadURL;
+
+const serve = require('electron-serve');
+
+const directory = app.isPackaged 
+  ? path.join(process.resourcesPath, 'app') 
+  : path.join(__dirname, '..', 'frontend', 'out');
+
+loadURL = serve({ directory });
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -18,12 +26,8 @@ function createWindow() {
     // icon: path.join(__dirname, 'icon.ico') // Optional: Add if icon exists
   });
 
-  // Load the static export of Next.js
-  const frontendPath = app.isPackaged
-    ? path.join(process.resourcesPath, 'app', 'index.html')
-    : path.join(__dirname, '..', 'frontend', 'out', 'index.html');
-    
-  mainWindow.loadFile(frontendPath);
+  // Load the static export using the pre-configured electron-serve
+  loadURL(mainWindow);
 
   mainWindow.on('closed', function () {
     mainWindow = null;

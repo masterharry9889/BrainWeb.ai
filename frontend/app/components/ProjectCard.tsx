@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { Trash2, MessageCircle, Upload, ArrowRight } from 'lucide-react';
 import styles from '../page.module.css';
 
@@ -10,9 +11,11 @@ interface ProjectCardProps {
 }
 
 export default function ProjectCard({ project: p, onDelete }: ProjectCardProps) {
+  const router = useRouter();
+
   return (
     <div 
-      onClick={() => window.location.href = `./project/view/chat/index.html?id=${p.id}`}
+      onClick={() => router.push(`/project/view/chat?id=${p.id}`)}
       className={`glass ${styles.card}`}
     >
       <div className={styles.cardTop}>

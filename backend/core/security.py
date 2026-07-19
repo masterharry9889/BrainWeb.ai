@@ -3,7 +3,16 @@ from cryptography.fernet import Fernet
 from pathlib import Path
 from dotenv import load_dotenv
 
-env_path = Path.cwd() / '.env'
+def get_app_data_dir() -> Path:
+    if os.name == 'nt':
+        base_dir = os.environ.get('APPDATA', os.path.expanduser('~'))
+    else:
+        base_dir = os.path.expanduser('~')
+    app_dir = Path(base_dir) / '.brainweb'
+    app_dir.mkdir(parents=True, exist_ok=True)
+    return app_dir
+
+env_path = get_app_data_dir() / '.env'
 load_dotenv(dotenv_path=env_path)
 
 # In a local desktop app, if the key is missing, we auto-generate and persist it.

@@ -1,4 +1,5 @@
 import { Settings } from 'lucide-react';
+import Link from 'next/link';
 import styles from '../page.module.css';
 
 export default function DashboardHeader() {
@@ -8,9 +9,9 @@ export default function DashboardHeader() {
         <img src="./logo.webp" alt="BrainWeb Logo" className={styles.logoImg} />
         BrainWeb
       </div>
-      <a href="./settings/index.html" className={`notch-icon-btn ${styles.settingsBtn}`} title="Settings">
+      <Link href="/settings" className={`notch-icon-btn ${styles.settingsBtn}`} title="Settings">
         <Settings size={20} />
-      </a>
+      </Link>
     </header>
   );
 }

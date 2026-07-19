@@ -109,9 +109,9 @@ export default function SettingsView() {
   return (
     <div style={{ padding: '2rem 5%', height: '100%', overflowY: 'auto', width: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-        <a href="../../index.html" className="notch-icon-btn" title="Back to Dashboard" style={{ margin: 0 }}>
+        <Link href="/" className="notch-icon-btn" title="Back to Dashboard" style={{ margin: 0 }}>
           <ArrowLeft size={20} />
-        </a>
+        </Link>
         <h1 style={{ margin: 0 }}>Settings</h1>
       </div>
       
